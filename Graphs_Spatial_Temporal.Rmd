@@ -1,0 +1,240 @@
+---
+title: "Famous People Rating in Spatial, Temporal, and Social Domains"
+author:  <h4 style="font-style:normal">Lily Cheng and Shalmali Patil
+date: "5/31/2019"
+output: html_document
+---
+
+<style type="text/css">
+
+h1.title {
+  font-size: 31px;
+  font-family: "Helvetica", Times, serif;
+  color: DarkBrown;
+}
+
+
+</style>
+
+<br>
+
+- The perceived spatial, temporal, and social distance is based on a 1 - 7 Likert scale. 1 means very close. **7 means very far.**
+- The magnitude of social distance represents the size of each bubble. **Big bubble means socially far.** Small bubble means socially close. 
+- Actual spatial distance is the Euclidean distance between the place the person is famous and the **University of California, Santa Barbara (34.4140° N, 119.8489° W)**. 
+- Actual temporal distance is the time from the person's birth date to **May 21, 2018** when participants completed the rating.
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE, message=FALSE}
+library(tidyverse)
+library(pwr)
+library(knitr)
+library(kableExtra)
+library(plotly)
+library(ggrepel)
+library(ggplot2)
+library(RColorBrewer)
+
+```
+
+
+```{r, echo=FALSE, echo=FALSE, message=FALSE, warning=FALSE}
+mortality <- read.csv("drug_mortality-2.csv")
+
+```
+
+### Figure 1. Perceived Spatial, Temporal, and Social Distance
+<br>
+
+#### a. General Tendency
+
+
+```{r, fig.width= 9, fig.height=6, echo=FALSE, message=FALSE, warning=FALSE}
+mortality$alive<-as.factor(mortality$alive)
+mortality$alive<-factor(mortality$alive, levels=c("Y","N"), labels=c("Alive","Dead"))
+mortality$us<-as.factor(mortality$us)
+mortality$us<-factor(mortality$us, levels=c(1,2,3), labels=c("California","Domestic","International"))
+
+graph_1 <-  ggplot(mortality, 
+         aes(x = temp_code,
+             y = temporal_mean, group = 1,
+             label = famous_person,
+             text = paste("Name: ", famous_person,
+                          "<br>Perceived Spatial Distance: ", spatial_mean,
+                          "<br>Perceived Temporal Distance: ", temporal_mean,
+                          "<br>Perceived Social Distance: ", social_mean,
+                          "<br>Frequency: ", frequency)))+ xlab("Famous People") +
+             ylab("Perceived Distance")+ labs(title="  ")+
+  geom_line(aes(temp_code, spatial_mean,colour = "Spatial"))+
+  geom_line(aes(temp_code, social_mean, colour = "Social"))+
+  geom_line(aes(colour = "Temporal"))+
+  scale_color_manual(values = c('Spatial' = '#377eb8','Social' = '#4daf4a', 'Temporal' = '#e41a1c'))+ 
+  geom_text_repel(size = 3)+
+  labs(color = 'Distance \n Domain')+
+  ggtitle(" ")
+
+#graph_1
+ggplotly(graph_1, tooltip = "text")
+```
+
+<br>
+
+#### b. Individual Data
+
+```{r, fig.width= 9.5, fig.height=6, echo=FALSE, message=FALSE, warning=FALSE}
+
+graph_1 <-  ggplot(mortality, 
+         aes(x = spatial_mean,
+             y = temporal_mean,
+             label = famous_person,
+             text = paste("Name: ", famous_person,
+                          "<br>Perceived Spatial Distance: ", spatial_mean,
+                          "<br>Perceived Temporal Distance: ", temporal_mean,
+                          "<br>Perceived Social Distance: ", social_mean,
+                          "<br>Frequency: ", frequency)
+             ))+ xlab("Perceived Spatial Distance") +
+             ylab("Perceived Temporal Distance")+ labs(title="  ")+ 
+  geom_point(aes(size = social_mean, color = famous_person), alpha = 0.4)+
+  geom_text_repel(size = 3)+
+  labs(color = '\n Famous People List \n size = social distance')+
+  theme(legend.position = "NA")
+
+#graph_1
+
+ggplotly(graph_1, tooltip = "text")
+```
+
+<br>
+
+### Figure 2. Actual Temporal Distance Over Actual Spatial Distance 
+
+<br>
+
+#### a. Metric
+```{r, fig.width = 9, fig.height=6, echo=FALSE, message=FALSE, warning=FALSE}
+
+
+
+graph_3 <-  ggplot(mortality, 
+         aes(x = (real_spatial),
+             y = (real_temporal2),
+             label = frequency,
+             text = paste("Name: ", famous_person,
+                          "<br>Actual Spatial Distance: ", real_spatial,"miles",
+                          "<br>Actual Temporal Distance: ", real_temporal2, "years",
+                          "<br>Perceived Social Distance: ", social_mean,
+                          "<br>Living Status: ", alive,
+                          "<br>Frequency: ", frequency)
+             ))+ xlab("Actual Spatial Distance (in miles)") +
+             ylab("Actual Temporal Distance (in years)") + labs(title="  ")+
+  geom_smooth(se=F, method="lm", color="grey")+
+  geom_point(aes(size = social_mean, color = alive), alpha = 0.4)+
+  geom_text_repel(size = 3)+
+  labs(color = 'size = \n social distance \n \n living \n status ')+
+  theme(legend.position = "NA")
+
+# graph_3
+
+ggplotly(graph_3, tooltip = "text")
+```
+
+<br>
+
+#### b. Logrithm
+```{r, fig.width = 9, fig.height=6, echo=FALSE, message=FALSE, warning=FALSE}
+
+graph_4 <-  ggplot(mortality, 
+         aes(x = log(real_spatial),
+             y = log(real_temporal2),
+             label = frequency,
+             text = paste("Name: ", famous_person,
+                          "<br>Actual Spatial Distance: ", real_spatial,"miles",
+                          "<br>Actual Temporal Distance: ", real_temporal2, "years",
+                          "<br>Perceived Social Distance: ", social_mean,
+                          "<br>Frequency: ", frequency)
+             ))+ xlab("Log of Actual Spatial Distance (in miles)") +
+             ylab("Log of Actual Temporal Distance (in years)") + labs(title="  ")+
+  geom_smooth(se=F, method="lm", color="grey")+
+  geom_point(aes(size = social_mean, color = alive), alpha = 0.4)+
+  geom_text_repel(size = 4)+
+  labs(color = 'size = \n social distance \n \n living \n status ')+
+  theme(legend.position = "NA")
+
+# graph_4
+
+ggplotly(graph_4, tooltip = "text")
+```
+<br>
+
+### Figure 3. Perceived Distance Over Actual Distance 
+<br>
+
+#### a. Perceived Temporal Distance Over Actual Temporal Distance 
+```{r, fig.width = 9, fig.height=6, echo=FALSE, message=FALSE, warning=FALSE}
+#mortality$alive<-as.factor(mortality$alive)
+#mortality$alive<-factor(mortality$alive, levels=c("Y","N"), labels=c("Alive","Dead"))
+
+graph_4 <-  ggplot(mortality, 
+         aes(x = log(real_temporal),
+             y = temporal_mean,
+             label = famous_person))+
+  geom_point()+
+  geom_text_repel()
+
+graph_4 <-  ggplot(mortality, 
+         aes(x = log(real_temporal),
+             y = temporal_mean,
+            label = famous_person,
+             text = paste("Name: ", famous_person,
+                          "<br>Actual Temporal Distance: ", real_temporal2, "years",
+                          "<br>Perceived Temporal Distance: ", temporal_mean,
+                          "<br>Perceived Social Distance: ", social_mean,
+                         "<br>Living Status: ", alive,
+                          "<br>Frequency: ", frequency)))+ xlab("Log of Real Temporal Distance (in days)") +
+             ylab("Perceived Temporal Distance") + labs(title=" ")+
+  geom_smooth(se=F, method="lm", color="grey")+
+  geom_point(aes(size = social_mean, color = alive), alpha = 0.4)+
+  geom_text_repel(size = 3)+
+  theme(legend.position = "NA")+
+  labs(color = 'size = \n social distance \n\nliving status ')
+
+# graph_4
+
+ggplotly(graph_4, tooltip = "text")
+
+```
+<br>
+
+#### b. Perceived Spatial Distance Over Actual Spatial Distance 
+
+```{r, fig.width = 9, fig.height=6, echo=FALSE, message=FALSE, warning=FALSE}
+#mortality$us<-as.factor(mortality$us)
+#mortality$us<-factor(mortality$us, levels=c(1,2,3), labels=c("California","Domestic","International"))
+
+graph_5 <-  ggplot(mortality, 
+         aes(x = log(real_spatial),
+             y = spatial_mean,
+             label = famous_person,
+             text = paste("Name: ", famous_person,
+                          "<br>Actual Temporal Distance: ", real_temporal2, "years",
+                          "<br>Perceived Temporal Distance: ", temporal_mean,
+                          "<br>Perceived Social Distance: ", social_mean,
+                          "<br>Place: ", us,
+                          "<br>Frequency: ", frequency))) + xlab("Log of Actual Spatial Distance (in miles)") +
+             ylab("Perceived Spatial Distance") +labs(title=" ")+
+  geom_smooth(se=F, method="lm", color="grey",alpha=0.1)+
+  geom_point(aes(size = social_mean, color = us), alpha = 0.4)+
+  geom_text_repel(size = 3)+
+  labs(color = 'size = \n social distance \n\n\n place \n category')+
+  theme(legend.position = "NA")
+
+# graph_5
+
+ggplotly(graph_5, tooltip = "text")
+
+```
+
+
+
+

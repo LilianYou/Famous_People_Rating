@@ -1,0 +1,252 @@
+---
+title: "Famous People Allocentric Distance Rating"
+author:  <h4 style="font-style:normal">Lily Cheng
+date: "7/27/2019"
+output: html_document
+---
+<style type="text/css">
+
+h1.title {
+  font-size: 31px;
+  font-family: "Helvetica", Times, serif;
+  color: DarkBrown;
+}
+
+
+</style>
+
+<br>
+
+- The result is based on **19** participants' ratings.
+- The perceived spatial, temporal, and social distance is based on a 1 - 7 Likert scale. **1 means very close. 7 means very far.**
+- The confidence level of spatial, temporal, and social distance is based on a 1 - 7 Likert scale. **1 means not confident at all. 7 means very confident.**
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(purrr)
+library(heatmaply)
+library(RColorBrewer)
+library(gridExtra)
+library(ggpubr)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# read data
+social_distance <- read.csv("~/Desktop/SPL_domain/Famous_People/allo_prep/social_distance.csv", header = TRUE) %>% mutate_all(~replace(., is.na(.), 1))
+
+row.names(social_distance) <- rev(colnames(social_distance))
+
+spatial_distance <- read.csv("~/Desktop/SPL_domain/Famous_People/allo_prep/spatial_distance.csv", header = TRUE)%>% mutate_all(~replace(., is.na(.), 1))
+row.names(spatial_distance) <- rev(colnames(spatial_distance))
+
+temporal_distance <- read.csv("~/Desktop/SPL_domain/Famous_People/allo_prep/temporal_distance.csv", header = TRUE)%>% mutate_all(~replace(., is.na(.), 1))
+row.names(temporal_distance) <- rev(colnames(temporal_distance))
+
+```
+
+
+```{r, echo=FALSE, message=FALSE}
+Social <- heatmaply(social_distance, colors = BrBG, #Oranges,
+          limits = c(1,7),
+          dendrogram = "none")
+Spatial <- heatmaply(spatial_distance, colors = BrBG,
+         limits = c(1,7),
+        dendrogram = "none")
+Temporal <- heatmaply(temporal_distance, colors = BrBG,
+          limits = c(1,7),
+          dendrogram = "none")
+```
+
+###Part I. Distance Ratings
+```{r, echo=FALSE, fig.width= 10.5, fig.height=6, message=FALSE}
+o <- subplot(Temporal, Spatial, Social, nrows = 1,  widths = NULL, heights = 0.45, 
+             shareY = TRUE, which_layout = "merge")
+
+o %>% layout(annotations = list(
+ list(x = 0.1 , y = 0.8, text = "Temporal", showarrow = F, xref='paper', yref='paper'),
+  list(x = 0.5 , y = 0.8, text = "Spatial", showarrow = F, xref='paper', yref='paper'),
+  list(x = 0.88 , y = 0.8, text = "Social", showarrow = F, xref='paper', yref='paper'))
+)
+```
+
+
+```{r, echo=FALSE, message=FALSE}
+# read data
+social_distance_sd <- read.csv("~/Desktop/SPL_domain/Famous_People/allo_prep/social_distance_sd.csv", header = TRUE) %>% mutate_all(~replace(., is.na(.), 0))
+
+row.names(social_distance_sd) <- rev(colnames(social_distance_sd))
+
+spatial_distance_sd <- read.csv("~/Desktop/SPL_domain/Famous_People/allo_prep/spatial_distance_sd.csv", header = TRUE)%>% mutate_all(~replace(., is.na(.),0))
+row.names(spatial_distance_sd) <- rev(colnames(spatial_distance_sd))
+
+temporal_distance_sd <- read.csv("~/Desktop/SPL_domain/Famous_People/allo_prep/temporal_distance_sd.csv", header = TRUE)%>% mutate_all(~replace(., is.na(.), 0))
+row.names(temporal_distance_sd) <- rev(colnames(temporal_distance_sd))
+
+```
+
+```{r, echo=FALSE, message=FALSE}
+Social_SD <- heatmaply(social_distance_sd, main = "  ", colors = Greys,
+          #limits = c(1,7),
+          dendrogram = "none")
+Spatial_SD <- heatmaply(spatial_distance_sd, main = "Spatial Distance Rating Variance", colors = Greys,
+        # limits = c(1,7),
+        dendrogram = "none")
+Temporal_SD <- heatmaply(temporal_distance_sd, main = "Distance Rating Variance", colors = Greys,
+ #         limits = c(1,7),
+          dendrogram = "none")
+```
+
+###Part II. Variance of Distance Ratings
+```{r, echo=FALSE, fig.width= 10.5, fig.height=6, message=FALSE}
+p <- subplot(Temporal_SD, Spatial_SD, Social_SD, nrows = 1,  widths = NULL, heights = 0.45, shareY = TRUE, which_layout = "merge")
+
+p %>% layout(annotations = list(
+ list(x = 0.1 , y = 0.8, text = "Temporal SD", showarrow = F, xref='paper', yref='paper'),
+  list(x = 0.5 , y = 0.8, text = "Spatial SD", showarrow = F, xref='paper', yref='paper'),
+  list(x = 0.88 , y = 0.8, text = "Social SD", showarrow = F, xref='paper', yref='paper'))
+)
+```
+
+
+```{r, echo=FALSE, message=FALSE}
+# read data
+social_confidence <- read.csv("~/Desktop/SPL_domain/Famous_People/allo_prep/social_confidence.csv", header = TRUE) %>% mutate_all(~replace(., is.na(.), 7))
+
+row.names(social_confidence) <- rev(colnames(social_confidence))
+
+spatial_confidence <- read.csv("~/Desktop/SPL_domain/Famous_People/allo_prep/spatial_confidence.csv", header = TRUE)%>% mutate_all(~replace(., is.na(.),7))
+row.names(spatial_confidence) <- rev(colnames(spatial_confidence))
+
+temporal_confidence <- read.csv("~/Desktop/SPL_domain/Famous_People/allo_prep/temporal_confidence.csv", header = TRUE)%>% mutate_all(~replace(., is.na(.), 7))
+row.names(temporal_confidence) <- rev(colnames(temporal_confidence))
+
+```
+
+```{r, echo=FALSE, message=FALSE}
+Social_confidence <- heatmaply(social_confidence, main = "  ", colors = Reds,
+          limits = c(1,7),
+          dendrogram = "none")
+Spatial_confidence <- heatmaply(spatial_confidence, main = "  ", colors = Reds,
+        limits = c(1,7),
+        dendrogram = "none")
+Temporal_confidence <- heatmaply(temporal_confidence, main = " ", colors = Reds,
+          limits = c(1,7),
+          dendrogram = "none")
+```
+
+###Part III. Confidence Ratings
+
+```{r, echo=FALSE, fig.width= 10.5, fig.height=6, message=FALSE}
+q <- subplot(Temporal_confidence, Spatial_confidence, Social_confidence, nrows = 1, widths = NULL, heights = 0.45, shareY = TRUE, which_layout = "merge")
+
+q %>% layout(annotations = list(
+ list(x = 0.1 , y = 0.8,  text = "Temporal Con.", showarrow = F, xref='paper', yref='paper'),
+  list(x = 0.5 , y = 0.8, text = "Spatial Con.", showarrow = F, xref='paper', yref='paper'),
+  list(x = 0.88 , y = 0.8,  text = "Social Con.", showarrow = F, xref='paper', yref='paper'))
+)
+```
+
+```{r, echo=FALSE, message=FALSE}
+# read data
+social_confidence_sd <- read.csv("~/Desktop/SPL_domain/Famous_People/allo_prep/social_confidence_sd.csv", header = TRUE) %>% mutate_all(~replace(., is.na(.), 0))
+
+row.names(social_confidence_sd) <- rev(colnames(social_confidence_sd))
+
+spatial_confidence_sd <- read.csv("~/Desktop/SPL_domain/Famous_People/allo_prep/spatial_confidence_sd.csv", header = TRUE)%>% mutate_all(~replace(., is.na(.),0))
+row.names(spatial_confidence_sd) <- rev(colnames(spatial_confidence_sd))
+
+temporal_confidence_sd <- read.csv("~/Desktop/SPL_domain/Famous_People/allo_prep/temporal_confidence_sd.csv", header = TRUE)%>% mutate_all(~replace(., is.na(.), 0))
+row.names(temporal_confidence_sd) <- rev(colnames(temporal_confidence_sd))
+
+```
+
+```{r, echo=FALSE, message=FALSE}
+Social_confidence_SD <- heatmaply(social_confidence_sd, main = "  ", colors = Greys,
+          #limits = c(1,7),
+          dendrogram = "none")
+Spatial_confidence_SD <- heatmaply(spatial_confidence_sd, main = "  Variance", colors = Greys,
+        # limits = c(1,7),
+        dendrogram = "none")
+Temporal_confidence_SD <- heatmaply(temporal_confidence_sd, main = " Variance", colors = Greys,
+ #         limits = c(1,7),
+          dendrogram = "none")
+```
+
+###Part IV. Variace of Confidence Ratings
+
+```{r, echo=FALSE, fig.width= 10.5, fig.height=6, message=FALSE}
+r <- subplot(Temporal_confidence_SD, Spatial_confidence_SD, Social_confidence_SD, nrows = 1,  widths = NULL, heights = 0.45, shareY = TRUE, which_layout = "merge")
+
+r %>% layout(annotations = list(
+ list(x = 0.07 , y = 0.8, text = "Temporal Con. SD", showarrow = F, xref='paper', yref='paper'),
+  list(x = 0.5 , y = 0.8, text = "Spatial Con. SD", showarrow = F, xref='paper', yref='paper'),
+  list(x = 0.91 , y = 0.8, text = "Social Con. SD", showarrow = F, xref='paper', yref='paper'))
+)
+```
+
+###Part V. Selected Pairs
+
+#### List 1.
+
+```{r, echo=FALSE, fig.width= 10, fig.height= 4.5, message=FALSE}
+df <- data.frame(matrix(ncol = 8, nrow = 3))
+rownames(df) <- c("Temporal", "Spatial", "Social")
+colnames(df) <- c("trump-khan","obama-lincoln","un-ghandi","mandela-ghandi","un-obama","lincoln-lee","trump-un","obama-mandela")
+
+df[,"trump-khan"] <- c(temporal_distance["trump","khan"],spatial_distance["trump","khan"],social_distance["trump","khan"])
+
+df[,"obama-mandela"] <- c(temporal_distance["obama","mandela"],spatial_distance["obama","mandela"],social_distance["obama","mandela"])
+
+df[,"un-obama"] <- c(temporal_distance["obama","un"],spatial_distance["obama","un"],social_distance["obama","un"])
+
+df[,"un-ghandi"] <- c(temporal_distance["ghandi","un"],spatial_distance["ghandi","un"],social_distance["ghandi","un"])
+
+df[,"mandela-ghandi"] <- c(temporal_distance["ghandi","mandela"],spatial_distance["ghandi","mandela"],social_distance["ghandi","mandela"])
+
+df[,"trump-un"] <- c(temporal_distance["trump","un"],spatial_distance["trump","un"],social_distance["trump","un"])
+
+df[,"lincoln-lee"] <- c(temporal_distance["lincoln","lee"],spatial_distance["lincoln","lee"],social_distance["lincoln","lee"])
+
+df[,"obama-lincoln"] <- c(temporal_distance["lincoln","obama"],spatial_distance["lincoln","obama"],social_distance["lincoln","obama"])
+
+#df <- df %>% arrange(Temporal)
+
+heatmaply(df, main = "  ", colors = BrBG, column_text_angle = 0,
+          dendrogram = "none")
+```
+
+#### List 2.
+
+```{r, echo=FALSE, fig.width= 10, fig.height= 4.5, message=FALSE}
+df <- data.frame(matrix(ncol = 8, nrow = 3))
+rownames(df) <- c("Temporal", "Spatial", "Social")
+colnames(df) <- c("trump-khan","trump-lee","lee-ghandi","mandela-ghandi","un-obama","lincoln-lee","khan-lincoln","khan-mandela")
+
+df[,"trump-khan"] <- c(temporal_distance["trump","khan"],spatial_distance["trump","khan"],social_distance["trump","khan"])
+
+df[,"khan-mandela"] <- c(temporal_distance["khan","mandela"],spatial_distance["khan","mandela"],social_distance["khan","mandela"])
+
+df[,"un-obama"] <- c(temporal_distance["obama","un"],spatial_distance["obama","un"],social_distance["obama","un"])
+
+df[,"lee-ghandi"] <- c(temporal_distance["ghandi","lee"],spatial_distance["ghandi","lee"],social_distance["ghandi","lee"])
+
+df[,"mandela-ghandi"] <- c(temporal_distance["ghandi","mandela"],spatial_distance["ghandi","mandela"],social_distance["ghandi","mandela"])
+
+df[,"khan-lincoln"] <- c(temporal_distance["khan","lincoln"],spatial_distance["khan","lincoln"],social_distance["khan","lincoln"])
+
+df[,"lincoln-lee"] <- c(temporal_distance["lincoln","lee"],spatial_distance["lincoln","lee"],social_distance["lincoln","lee"])
+
+df[,"trump-lee"] <- c(temporal_distance["trump","lee"],spatial_distance["trump","lee"],social_distance["trump","lee"])
+
+#df <- df %>% arrange(Temporal)
+
+heatmaply(df, main = "  ", colors = BrBG, column_text_angle = 0,
+          dendrogram = "none")
+```
+
